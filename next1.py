@@ -42,8 +42,7 @@ logging.info('Starting script')
 
 # Fetch and preprocess data
 logging.info('Fetching and preprocessing data')
-X_train, Y_train, X_test, Y_test, train_features = data_fetching.fetch_and_preprocess_data()  # Capture train_features here
-
+X_train, Y_train, X_test, Y_test, train_features, test_features, data, scaled_train_target, scaled_test_target = data_fetching.fetch_and_preprocess_data()
 
 # Print the first few elements of Y_train and Y_test
 logging.info("First few elements of Y_train: " + str(Y_train[:5]))
