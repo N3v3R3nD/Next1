@@ -134,4 +134,4 @@ def fetch_and_preprocess_data():
     X_train, Y_train = np.array(X_train), np.array(Y_train)
     X_test, Y_test = np.array(X_test), np.array(Y_test)
 
-    return X_train, Y_train, X_test, Y_test, train_features 
+    return X_train, Y_train, X_test, Y_test, train_features, test_features, data, scaled_train_target, scaled_test_target
