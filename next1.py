@@ -73,7 +73,7 @@ logging.info("First value in scaled_train_target: " + str(scaled_train_target[0]
 # Function to create LSTM model
 def create_model(units=100, optimizer='adam', dropout_rate=0.0):
     model = Sequential()
-    model.add(LSTM(units=units, return_sequences=True, input_shape=(look_back, features.shape[1]), kernel_regularizer=tf.keras.regularizers.L2(0.01)))
+    model.add(LSTM(units=units, return_sequences=True, input_shape=(look_back, train_features.shape[1]), kernel_regularizer=tf.keras.regularizers.L2(0.01)))
     model.add(Dropout(dropout_rate))  # Add dropout layer
     model.add(LSTM(units=units, return_sequences=True, kernel_regularizer=tf.keras.regularizers.L2(0.01)))
     model.add(Dropout(dropout_rate))  # Add dropout layer
