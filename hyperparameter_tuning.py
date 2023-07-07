@@ -5,13 +5,15 @@ from scikeras.wrappers import KerasRegressor
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LSTM, Dropout
 from tensorflow.keras import regularizers
+from skopt import BayesSearchCV
 import tensorflow as tf
 import time
 import json
 import logging
 
+
 def create_model(look_back, num_features, units=100, optimizer='adam', dropout_rate=0.0):
-    print(f"num_features: {num_features}")  # Print the value of num_features
+    print(f"Please wait, tuning in progress") 
     model = Sequential()
     model.add(LSTM(units=units, return_sequences=True, input_shape=(look_back, num_features), kernel_regularizer=regularizers.L2(0.01)))
     model.add(Dropout(dropout_rate))
@@ -23,13 +25,13 @@ def create_model(look_back, num_features, units=100, optimizer='adam', dropout_r
     model.compile(optimizer=optimizer, loss='mean_squared_error')
     return model
 
-def hyperparameter_tuning(X_train, Y_train, look_back, feature_num, train_features):
+
+def hyperparameter_tuning(X_train, Y_train, look_back, feature_num, train_features, use_bayesian_optimization=False):
     # Wrap Keras model with KerasRegressor
     model_params = {'units': 100, 'optimizer': 'adam', 'dropout_rate': 0.0, 'num_features': feature_num}
     model = KerasRegressor(model=create_model, look_back=look_back, **model_params, verbose=0)
     
-    
-    # Define hyperparameters for RandomizedSearchCV
+    # Define hyperparameters for RandomizedSearchCV or BayesSearchCV
     param_dist = {
         'units': [50, 100, 150, 200],  # More units can help model complexity
         'batch_size': [16, 32, 64, 128],  # Larger batch sizes can speed up training
@@ -41,8 +43,25 @@ def hyperparameter_tuning(X_train, Y_train, look_back, feature_num, train_featur
     # Use TimeSeriesSplit for cross-validation
     tscv = TimeSeriesSplit(n_splits=10)  # More splits can provide a more robust estimate of model performance
 
-    # Define random_search before the try block
-    random_search = RandomizedSearchCV(estimator=model, param_distributions=param_dist, cv=tscv, n_iter=20, n_jobs=-1)  # More iterations can explore the hyperparameter space more thoroughly
+    # Define search_cv before the try block
+    if use_bayesian_optimization:
+        logging.info('Using Bayesian Optimization for hyperparameter tuning')
+        search_cv = BayesSearchCV(
+            estimator=model,
+            search_spaces=param_dist,
+            n_iter=50,
+            cv=tscv,
+            n_jobs=-1
+        )
+    else:
+        logging.info('Using Random Search for hyperparameter tuning')
+        search_cv = RandomizedSearchCV(
+            estimator=model,
+            param_distributions=param_dist,
+            n_iter=20,
+            cv=tscv,
+            n_jobs=-1
+        )
 
     # Check if hyperparameters file exists
     try:
@@ -50,17 +69,16 @@ def hyperparameter_tuning(X_train, Y_train, look_back, feature_num, train_featur
             best_params = json.load(f)
         logging.info(f'Loaded parameters: {best_params}')
     except FileNotFoundError:
-        # Perform RandomizedSearchCV
-        logging.info('Performing RandomizedSearchCV')
-        random_search = RandomizedSearchCV(estimator=model, param_distributions=param_dist, cv=tscv, verbose=2, n_iter=10, n_jobs=-1)  # Use all cores
-
+        # Perform RandomizedSearchCV or BayesSearchCV
+        logging.info('Performing hyperparameter search')
+        
         start_time = time.time()
-        random_search.fit(X_train, Y_train)
+        search_cv.fit(X_train, Y_train)
         elapsed_time = time.time() - start_time
-        logging.info(f'RandomizedSearchCV completed. Elapsed time: {elapsed_time} seconds')
+        logging.info(f'Hyperparameter search completed. Elapsed time: {elapsed_time} seconds')
 
         # Get the best parameters
-        best_params = random_search.best_params_
+        best_params = search_cv.best_params_
         logging.info(f'Best parameters: {best_params}')
 
         # Save the best parameters
