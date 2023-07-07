@@ -15,15 +15,15 @@ def evaluate_model(Y_train, Y_test, train_predict, test_predict, target_scaler):
     Y_test = target_scaler.inverse_transform(Y_test.reshape(-1, 1))
 
     # Calculate root mean squared error
-    train_score = np.sqrt(mean_squared_error(Y_train, train_predict))
-    logging.info(f'Train Score: {train_score} RMSE')
-    test_score = np.sqrt(mean_squared_error(Y_test, test_predict))
-    logging.info(f'Test Score: {test_score} RMSE')
+    train_rmse = np.sqrt(mean_squared_error(Y_train, train_predict))
+    logging.info(f'Train Score: {train_rmse} RMSE')
+    test_rmse = np.sqrt(mean_squared_error(Y_test, test_predict))
+    logging.info(f'Test Score: {test_rmse} RMSE')
 
     # Calculate mean absolute error
-    train_score = mean_absolute_error(Y_train, train_predict)
-    logging.info(f'Train Score: {train_score} MAE')
-    test_score = mean_absolute_error(Y_test, test_predict)
-    logging.info(f'Test Score: {test_score} MAE')
+    train_mae = mean_absolute_error(Y_train, train_predict)
+    logging.info(f'Train Score: {train_mae} MAE')
+    test_mae = mean_absolute_error(Y_test, test_predict)
+    logging.info(f'Test Score: {test_mae} MAE')
 
-    return train_predict, test_predict
+    return train_predict, test_predict, train_rmse, test_rmse, train_mae, test_mae
