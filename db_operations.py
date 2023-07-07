@@ -11,7 +11,8 @@ def connect_to_db():
         user='postgres',
         password='test123'
     )
-    return conn
+    cur = conn.cursor()
+    return conn, cur
 
 def create_tables(cur):
     # Create forecast_data table if it doesn't exist
@@ -61,7 +62,7 @@ def insert_data(cur, history, Y_train, train_predict, test_predict):
     for i in range(len(Y_train)):
         date = (datetime.today() - timedelta(days=len(Y_train)-i))
         date_str = date.strftime('%Y-%m-%d')
-        actual_price = Y_train[i][0]
+        actual_price = Y_train[i]
         predicted_price = train_predict[i][0]
         cur.execute(f"""
             INSERT INTO actual_vs_predicted (date, actual_price, predicted_price) 
