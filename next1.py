@@ -23,6 +23,7 @@ from sklearn.model_selection import KFold
 from pandas.tseries.holiday import USFederalHolidayCalendar
 import data_fetching
 import db_operations
+import model_evaluation
 
 # Set up logging
 logging.basicConfig(filename='next1.log', level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
@@ -42,7 +43,7 @@ logging.info('Starting script')
 
 # Fetch and preprocess data
 logging.info('Fetching and preprocessing data')
-X_train, Y_train, X_test, Y_test, train_features, test_features, data, scaled_train_target, scaled_test_target, look_back = data_fetching.fetch_and_preprocess_data()
+X_train, Y_train, X_test, Y_test, train_features, test_features, data, scaled_train_target, scaled_test_target, look_back, target_scaler = data_fetching.fetch_and_preprocess_data()
 
 # Print the first few elements of Y_train and Y_test
 logging.info("First few elements of Y_train: " + str(Y_train[:5]))
@@ -167,34 +168,11 @@ keras_model = model.model_
 model.model_.save('trained_model.h5')
 logging.info('Saved trained model to disk')
 
-# Predict prices
-logging.info('Predicting prices')
-
-# Reshape predictions into 2D arrays
-train_predict = train_predict.reshape(-1, 1)
-test_predict = test_predict.reshape(-1, 1)
-
-# Invert predictions using target_scaler
-train_predict = target_scaler.inverse_transform(train_predict)
-Y_train = target_scaler.inverse_transform(Y_train.reshape(-1, 1))
-test_predict = target_scaler.inverse_transform(test_predict)
-Y_test = target_scaler.inverse_transform(Y_test.reshape(-1, 1))
-
-# Calculate root mean squared error
-train_score = np.sqrt(mean_squared_error(Y_train, train_predict))
-logging.info(f'Train Score: {train_score} RMSE')
-test_score = np.sqrt(mean_squared_error(Y_test, test_predict))
-logging.info(f'Test Score: {test_score} RMSE')
-
-# Calculate mean absolute error
-train_score = mean_absolute_error(Y_train, train_predict)
-logging.info(f'Train Score: {train_score} MAE')
-test_score = mean_absolute_error(Y_test, test_predict)
-logging.info(f'Test Score: {test_score} MAE')
+# Evaluate model
+train_predict, test_predict = model_evaluation.evaluate_model(Y_train, Y_test, train_predict, test_predict, target_scaler)
 
 # Connect to the database
-conn = db_operations.connect_to_db()
-cur = conn.cursor()
+conn, cur = db_operations.connect_to_db()
 
 # Create tables
 db_operations.create_tables(cur)
