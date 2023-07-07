@@ -44,6 +44,19 @@ def create_tables(cur):
         )
     """)
 
+    # Create evaluation_results table if it doesn't exist
+    logging.info('Creating evaluation_results table if it doesn\'t exist')
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS evaluation_results (
+            id SERIAL PRIMARY KEY,
+            train_rmse FLOAT,
+            test_rmse FLOAT,
+            train_mae FLOAT,
+            test_mae FLOAT,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
 def insert_data(cur, history, Y_train, train_predict, test_predict, target_scaler):    # Insert forecast data into the database
     logging.info('Inserting forecast data into the database')
     for i in range(len(test_predict)):
@@ -76,7 +89,15 @@ def insert_data(cur, history, Y_train, train_predict, test_predict, target_scale
             ON CONFLICT (date) DO UPDATE 
             SET actual_price = {actual_price}, predicted_price = {predicted_price}
         """)
+        
 
+def insert_evaluation_results(cur, train_rmse, test_rmse, train_mae, test_mae):
+    # Insert evaluation results into the database
+    logging.info('Inserting evaluation results into the database')
+    cur.execute(f"""
+        INSERT INTO evaluation_results (train_rmse, test_rmse, train_mae, test_mae) 
+        VALUES ({train_rmse}, {test_rmse}, {train_mae}, {test_mae})
+    """)
 def close_connection(conn):
     # Commit changes and close connection
     conn.commit()
