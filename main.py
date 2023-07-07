@@ -25,6 +25,7 @@ from pandas.tseries.holiday import USFederalHolidayCalendar
 import data_fetching
 import db_operations
 import model_evaluation
+from hyperparameter_tuning import create_model, hyperparameter_tuning
 
 # Set up logging
 logging.basicConfig(filename='next1.log', level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
@@ -46,7 +47,14 @@ logging.info('Starting script')
 logging.info('Fetching and preprocessing data')
 X_train, Y_train, X_test, Y_test, train_features, test_features, data, scaled_train_target, scaled_test_target, look_back, target_scaler = data_fetching.fetch_and_preprocess_data()
 
+logging.info('Hyperparameter tuning')
+# Hyperparameter tuning
+best_params = hyperparameter_tuning(X_train, Y_train, look_back, train_features.shape[1])
 # Print the first few elements of Y_train and Y_test
+
+# Create model with best parameters
+model = KerasRegressor(model=create_model, verbose=0, **best_params)
+
 logging.info("First few elements of Y_train: " + str(Y_train[:5]))
 logging.info("First few elements of Y_test: " + str(Y_test[:5]))
 
@@ -70,63 +78,6 @@ scaled_first_close_price = (first_close_price - min_close_price) / (max_close_pr
 # Check if the manually computed scaled value matches the first value in scaled_train_target
 logging.info("Manually computed scaled value for the first 'Close' price: " + str(scaled_first_close_price))
 logging.info("First value in scaled_train_target: " + str(scaled_train_target[0][0]))
-
-
-# Function to create LSTM model
-def create_model(units=100, optimizer='adam', dropout_rate=0.0):
-    model = Sequential()
-    model.add(LSTM(units=units, return_sequences=True, input_shape=(look_back, train_features.shape[1]), kernel_regularizer=tf.keras.regularizers.L2(0.01)))
-    model.add(Dropout(dropout_rate))  # Add dropout layer
-    model.add(LSTM(units=units, return_sequences=True, kernel_regularizer=tf.keras.regularizers.L2(0.01)))
-    model.add(Dropout(dropout_rate))  # Add dropout layer
-    model.add(LSTM(units=units, return_sequences=False, kernel_regularizer=tf.keras.regularizers.L2(0.01)))
-    model.add(Dense(units=25))
-    model.add(Dense(units=1))
-    model.compile(optimizer=optimizer, loss='mean_squared_error')
-    return model
-
-# Wrap Keras model with KerasRegressor
-model_params = {'units': 100, 'optimizer': 'adam', 'dropout_rate': 0.0}
-model = KerasRegressor(model=create_model, **model_params, verbose=0)
-
-# Define hyperparameters for RandomizedSearchCV
-param_dist = {
-    'units': [50, 100, 150, 200],  # More units can help model complexity
-    'batch_size': [16, 32, 64, 128],  # Larger batch sizes can speed up training
-    'epochs': [50, 100, 150],  # More epochs can lead to more stable models
-    'dropout_rate': [0.0, 0.1, 0.2, 0.3, 0.4, 0.5],  # Dropout can help prevent overfitting
-    'optimizer': ['Adam']  # Different optimizers can have different effects on training
-}
-
-# UseTimeSeriesSplit for cross-validation
-tscv = TimeSeriesSplit(n_splits=10)  # More splits can provide a more robust estimate of model performance
-
-# Define random_search before the try block
-random_search = RandomizedSearchCV(estimator=model, param_distributions=param_dist, cv=tscv, n_iter=20, n_jobs=-1)  # More iterations can explore the hyperparameter space more thoroughly
-
-# Check if hyperparameters file exists
-try:
-    with open('best_params.json', 'r') as f:
-        best_params = json.load(f)
-    logging.info(f'Loaded parameters: {best_params}')
-except FileNotFoundError:
-    # Perform RandomizedSearchCV
-    logging.info('Performing RandomizedSearchCV')
-    random_search = RandomizedSearchCV(estimator=model, param_distributions=param_dist, cv=tscv, verbose=2, n_iter=10, n_jobs=-1)  # Use all cores
-
-    start_time = time.time()
-    random_search.fit(X_train, Y_train)
-    elapsed_time = time.time() - start_time
-    logging.info(f'RandomizedSearchCV completed. Elapsed time: {elapsed_time} seconds')
-
-    # Get the best parameters
-    best_params = random_search.best_params_
-    logging.info(f'Best parameters: {best_params}')
-
-    # Save the best parameters
-    with open('best_params.json', 'w') as f:
-        json.dump(best_params, f)
-    logging.info('Saved best parameters')
 
 # Define early stopping
 early_stopping = EarlyStopping(monitor='val_loss', patience=10)
@@ -182,7 +133,8 @@ model.model_.save('trained_model.h5')
 logging.info('Saved trained model to disk')
 
 # Evaluate model
-train_predict, test_predict = model_evaluation.evaluate_model(Y_train, Y_test, train_predict, test_predict, target_scaler)
+train_predict, test_predict, train_rmse, test_rmse, train_mae, test_mae = model_evaluation.evaluate_model(Y_train, Y_test, train_predict, test_predict, target_scaler)
+
 # Connect to the database
 conn, cur = db_operations.connect_to_db()
 
@@ -191,6 +143,8 @@ db_operations.create_tables(cur)
 
 # Insert data
 db_operations.insert_data(cur, history, Y_train, train_predict, test_predict, target_scaler)
+db_operations.insert_evaluation_results(cur, train_rmse, test_rmse, train_mae, test_mae)
+
 
 # Close the connection
 db_operations.close_connection(conn)
