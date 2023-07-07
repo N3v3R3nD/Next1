@@ -43,12 +43,35 @@ To use this application, you need to have Python and PostgreSQL installed on you
 
 ## Usage
 
-Once you have the prerequisites, you can clone the repository and run `main.py`:
+This application is designed to be easy to use. Follow the steps below to get started:
 
+1. **Clone the repository**: Clone the Next1v2 repository to your local machine using the following command in your terminal:
 
-git clone https://github.com/N3v3R3nD/Next1v2.git
-cd Next1v2
-python main.py
+    \```bash
+    git clone https://github.com/N3v3R3nD/Next1v2.git
+    \```
+
+2. **Navigate to the project directory**: Change your current directory to the Next1v2 directory:
+
+    \```bash
+    cd Next1v2
+    \```
+
+3. **Install the required Python libraries**: Before running the application, you need to install the required Python libraries. You can do this using pip:
+
+    \```bash
+    pip install -r requirements.txt
+    \```
+
+4. **Run the application**: Now, you can run the application using the following command:
+
+    \```bash
+    python main.py
+    \```
+
+The application will fetch the data, preprocess it, train the model, evaluate it, and store the results in a PostgreSQL database.
+
+Remember to replace the backslashes (`\`) before each triple backtick (```) when you copy this text into your README file. The backslashes are used here to escape the backticks and make them visible in this message.
 
 
 ## Contributing
