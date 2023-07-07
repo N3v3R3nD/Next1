@@ -45,22 +45,17 @@ logging.info('Starting script')
 
 # Fetch and preprocess data
 logging.info('Fetching and preprocessing data')
-X_train, Y_train, X_test, Y_test, train_features, test_features, data, scaled_train_target, scaled_test_target, look_back, target_scaler = data_fetching.fetch_and_preprocess_data()
+X_train, Y_train, X_test, Y_test, train_features, test_features, data, scaled_train_target, scaled_test_target, look_back, target_scaler, num_features = data_fetching.fetch_and_preprocess_data()
 
 logging.info('Hyperparameter tuning')
 # Hyperparameter tuning
-best_params = hyperparameter_tuning(X_train, Y_train, look_back, train_features.shape[1])
+best_params = hyperparameter_tuning(X_train, Y_train, look_back, train_features.shape[1], train_features)
+model_params = best_params.copy()
 # Print the first few elements of Y_train and Y_test
 
 # Create model with best parameters
-model = KerasRegressor(model=create_model, verbose=0, **best_params)
 
-logging.info("First few elements of Y_train: " + str(Y_train[:5]))
-logging.info("First few elements of Y_test: " + str(Y_test[:5]))
-
-# Print the last few elements of Y_train and Y_test
-logging.info("Last few elements of Y_train: " + str(Y_train[-5:]))
-logging.info("Last few elements of Y_test: " + str(Y_test[-5:]))
+model = KerasRegressor(model=create_model, look_back=look_back, num_features=train_features.shape[1], **model_params, verbose=0)
 
 # Reshape data for LSTM
 logging.info('Reshaping data for LSTM')
@@ -100,8 +95,8 @@ if kf:
         Y_train_fold, Y_val_fold = Y_train[train_index], Y_train[val_index]
 
         # Create a new model for this fold
-        model = KerasRegressor(model=create_model, verbose=0, **best_params)
-
+        model = KerasRegressor(model=create_model, look_back=look_back, **model_params, verbose=0)
+        
         # Fit the model and store the model object
         history = model.fit(X_train_fold, Y_train_fold, validation_data=(X_val_fold, Y_val_fold), verbose=1, callbacks=[early_stopping])
 
@@ -110,12 +105,13 @@ if kf:
 
 else:
     # No KFold cross-validation, train a single model on the whole dataset
-    model = KerasRegressor(model=create_model, verbose=0, **best_params)
+    # Wrap Keras model with KerasRegressor
+    # Create model with best parameters
+    model = KerasRegressor(model=create_model, look_back=look_back, num_features=num_features, **model_params, verbose=0)
     history = model.fit(X_train, Y_train, validation_data=(X_test, Y_test), verbose=1, callbacks=[early_stopping])
 
-    models.append(model)
 
-logging.info('Training completed')
+    models.append(model)
 
 # Access the underlying Keras model and its history
 keras_model = model.model_
