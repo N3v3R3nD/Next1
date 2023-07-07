@@ -43,7 +43,6 @@ def create_tables(cur):
         )
     """)
 
-
 def insert_data(cur, history, Y_train, train_predict, test_predict):
     # Insert forecast data into the database
     logging.info('Inserting forecast data into the database')
@@ -59,17 +58,22 @@ def insert_data(cur, history, Y_train, train_predict, test_predict):
 
     # Insert actual and predicted prices into the database
     logging.info('Inserting actual and predicted prices into the database')
+
+    if len(Y_train) != len(train_predict):
+        raise ValueError("Length of Y_train and train_predict don't match")
+
     for i in range(len(Y_train)):
-        date = (datetime.today() - timedelta(days=len(Y_train)-i))
-        date_str = date.strftime('%Y-%m-%d')
-        actual_price = Y_train[i]
+        date = (datetime.today() - timedelta(days=len(Y_train) - i - 1)).strftime('%Y-%m-%d')  # Calculate the correct date
+        actual_price = Y_train[i][0]
         predicted_price = train_predict[i][0]
         cur.execute(f"""
             INSERT INTO actual_vs_predicted (date, actual_price, predicted_price) 
-            VALUES ('{date_str}', {actual_price}, {predicted_price}) 
+            VALUES ('{date}', {actual_price}, {predicted_price}) 
             ON CONFLICT (date) DO UPDATE 
             SET actual_price = {actual_price}, predicted_price = {predicted_price}
         """)
+
+
 
 def close_connection(conn):
     # Commit changes and close connection
