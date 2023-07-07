@@ -1,3 +1,4 @@
+#data_fetching.py
 def fetch_and_preprocess_data():
     import os
     import yfinance as yf
@@ -15,7 +16,7 @@ def fetch_and_preprocess_data():
     # Fetch data using yfinance
     logging.info('Fetching data using yfinance')
     today = datetime.today().strftime('%Y-%m-%d')
-    data = yf.download('SPY', start='2021-01-29', end=today)
+    data = yf.download('SPY', start='2015-01-29', end=today)
     logging.info('Data downloaded from Yahoo Finance')
     logging.info(f'Data shape: {data.shape}')
     logging.info('First few rows of the data:')
@@ -134,4 +135,4 @@ def fetch_and_preprocess_data():
     X_train, Y_train = np.array(X_train), np.array(Y_train)
     X_test, Y_test = np.array(X_test), np.array(Y_test)
 
-    return X_train, Y_train, X_test, Y_test, train_features, test_features, data, scaled_train_target, scaled_test_target, look_back
+    return X_train, Y_train, X_test, Y_test, train_features, test_features, data, scaled_train_target, scaled_test_target, look_back, target_scaler
