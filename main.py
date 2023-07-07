@@ -97,7 +97,7 @@ param_dist = {
     'optimizer': ['Adam']  # Different optimizers can have different effects on training
 }
 
-# Use TimeSeriesSplit for cross-validation
+# UseTimeSeriesSplit for cross-validation
 tscv = TimeSeriesSplit(n_splits=10)  # More splits can provide a more robust estimate of model performance
 
 # Define random_search before the try block
@@ -131,24 +131,36 @@ except FileNotFoundError:
 early_stopping = EarlyStopping(monitor='val_loss', patience=10)
 
 # Define 5-fold cross validation
-kf = KFold(n_splits=2, shuffle=True, random_state=42)
+use_kfold = False  # Set this flag to True to enable KFold cross-validation
+kf = KFold(n_splits=5, shuffle=True, random_state=42) if use_kfold else None
+
+# Log the KFold configuration
+logging.info(f'KFold cross-validation: {use_kfold}')
 
 # Define a list to store the model objects of each fold
 models = []
 
 # Loop over each fold
-for train_index, val_index in kf.split(X_train):
-    # Create training and validation sets for this fold
-    X_train_fold, X_val_fold = X_train[train_index], X_train[val_index]
-    Y_train_fold, Y_val_fold = Y_train[train_index], Y_train[val_index]
+if kf:
+    for train_index, val_index in kf.split(X_train):
+        # Create training and validation sets for this fold
+        X_train_fold, X_val_fold = X_train[train_index], X_train[val_index]
+        Y_train_fold, Y_val_fold = Y_train[train_index], Y_train[val_index]
 
-    # Create a new model for this fold
+        # Create a new model for this fold
+        model = KerasRegressor(model=create_model, verbose=0, **best_params)
+
+        # Fit the model and store the model object
+        history = model.fit(X_train_fold, Y_train_fold, validation_data=(X_val_fold, Y_val_fold), verbose=1, callbacks=[early_stopping])
+
+        # Add the model object to the list
+        models.append(model)
+
+else:
+    # No KFold cross-validation, train a single model on the whole dataset
     model = KerasRegressor(model=create_model, verbose=0, **best_params)
+    history = model.fit(X_train, Y_train, validation_data=(X_test, Y_test), verbose=1, callbacks=[early_stopping])
 
-    # Fit the model and store the model object
-    history = model.fit(X_train_fold, Y_train_fold, validation_data=(X_val_fold, Y_val_fold), verbose=1, callbacks=[early_stopping])
-
-    # Add the model object to the list
     models.append(model)
 
 logging.info('Training completed')
@@ -170,7 +182,6 @@ logging.info('Saved trained model to disk')
 
 # Evaluate model
 train_predict, test_predict = model_evaluation.evaluate_model(Y_train, Y_test, train_predict, test_predict, target_scaler)
-
 # Connect to the database
 conn, cur = db_operations.connect_to_db()
 
