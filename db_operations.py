@@ -43,8 +43,7 @@ def create_tables(cur):
         )
     """)
 
-def insert_data(cur, history, Y_train, train_predict, test_predict):
-    # Insert forecast data into the database
+def insert_data(cur, history, Y_train, train_predict, test_predict, target_scaler):    # Insert forecast data into the database
     logging.info('Inserting forecast data into the database')
     for i in range(len(test_predict)):
         date = (datetime.today() + timedelta(days=i)).strftime('%Y-%m-%d')
@@ -64,16 +63,18 @@ def insert_data(cur, history, Y_train, train_predict, test_predict):
 
     for i in range(len(Y_train)):
         date = (datetime.today() - timedelta(days=len(Y_train) - i - 1)).strftime('%Y-%m-%d')  # Calculate the correct date
-        actual_price = Y_train[i][0]
+        actual_price = target_scaler.inverse_transform(Y_train[i].reshape(-1, 1))[0][0]
         predicted_price = train_predict[i][0]
+        
+        # Print the values for comparison
+        # print(f"Actual Price: {actual_price}, Predicted Price: {predicted_price}")
+        
         cur.execute(f"""
             INSERT INTO actual_vs_predicted (date, actual_price, predicted_price) 
             VALUES ('{date}', {actual_price}, {predicted_price}) 
             ON CONFLICT (date) DO UPDATE 
             SET actual_price = {actual_price}, predicted_price = {predicted_price}
         """)
-
-
 
 def close_connection(conn):
     # Commit changes and close connection
