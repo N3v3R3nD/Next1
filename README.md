@@ -45,11 +45,11 @@ To use this application, you need to have Python and PostgreSQL installed on you
 
 Once you have the prerequisites, you can clone the repository and run `main.py`:
 
-\```bash
+
 git clone https://github.com/N3v3R3nD/Next1v2.git
 cd Next1v2
 python main.py
-\```
+
 
 ## Contributing
 
