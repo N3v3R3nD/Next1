@@ -53,9 +53,9 @@ python main.py
 
 ## Contributing
 
-\```markdown
+
 Contributions are welcome! Please feel free to submit a pull request. If you have any questions or issues, feel free to open an issue in the repository.
-\```
+
 
 ## License
 
