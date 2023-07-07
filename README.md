@@ -71,16 +71,16 @@ This application is designed to be easy to use. Follow the steps below to get st
 
 The application will fetch the data, preprocess it, train the model, evaluate it, and store the results in a PostgreSQL database.
 
-Remember to replace the backslashes (`\`) before each triple backtick (```) when you copy this text into your README file. The backslashes are used here to escape the backticks and make them visible in this message.
-
 
 ## Contributing
 
 
 Contributions are welcome! Please feel free to submit a pull request. If you have any questions or issues, feel free to open an issue in the repository.
 
-
 ## License
 
-This project is licensed under the terms of the MIT license. This allows you to use, modify, and distribute the code in this repository for your own projects as long as you include the original copyright notice and disclaimers.
+All rights reserved. This project and the associated source code is the property of the repository owner. No part of this software, including this file, may be copied, modified, propagated, or distributed except with the prior written permission of the owner.
+
+PLEASE BE AWARE that this software is provided 'as is', without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and non-infringement. In no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the software or the use or other dealings in the software.
+
 
