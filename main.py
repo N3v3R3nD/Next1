@@ -49,7 +49,7 @@ X_train, Y_train, X_test, Y_test, train_features, test_features, data, scaled_tr
 
 logging.info('Hyperparameter tuning')
 # Hyperparameter tuning
-best_params = hyperparameter_tuning(X_train, Y_train, look_back, train_features.shape[1], train_features)
+best_params = hyperparameter_tuning(X_train, Y_train, look_back, train_features.shape[1], train_features, use_bayesian_optimization=True)
 model_params = best_params.copy()
 # Print the first few elements of Y_train and Y_test
 
@@ -75,7 +75,7 @@ logging.info("Manually computed scaled value for the first 'Close' price: " + st
 logging.info("First value in scaled_train_target: " + str(scaled_train_target[0][0]))
 
 # Define early stopping
-early_stopping = EarlyStopping(monitor='val_loss', patience=10)
+early_stopping = EarlyStopping(monitor='val_loss', patience=2)
 
 # Define 5-fold cross validation
 use_kfold = False  # Set this flag to True to enable KFold cross-validation
@@ -109,7 +109,6 @@ else:
     # Create model with best parameters
     model = KerasRegressor(model=create_model, look_back=look_back, num_features=num_features, **model_params, verbose=0)
     history = model.fit(X_train, Y_train, validation_data=(X_test, Y_test), verbose=1, callbacks=[early_stopping])
-
 
     models.append(model)
 
