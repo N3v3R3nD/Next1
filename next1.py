@@ -131,7 +131,7 @@ except FileNotFoundError:
 early_stopping = EarlyStopping(monitor='val_loss', patience=10)
 
 # Define 5-fold cross validation
-kf = KFold(n_splits=5, shuffle=True, random_state=42)
+kf = KFold(n_splits=2, shuffle=True, random_state=42)
 
 # Define a list to store the model objects of each fold
 models = []
