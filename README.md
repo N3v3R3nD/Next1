@@ -1,4 +1,4 @@
-# Next1: Stock Market Forecasting Application
+# Next1v2: Stock Market Forecasting Application
 
 Next1v2 is a sophisticated Python application designed for stock market forecasting. It leverages machine learning techniques to predict future prices based on historical data and various technical indicators.
 
@@ -25,6 +25,10 @@ The application engineers features from the data, including technical indicators
 
 The application trains a machine learning model on the processed data. The model parameters are stored in `best_params.json`. The model is evaluated using metrics like RMSE and MAE. This is done in the `evaluate_model` function in `model_evaluation.py`.
 
+### Hyperparameter Tuning
+
+The application includes a hyperparameter tuning function that can use either Random Search or Bayesian Optimization to find the best parameters for the model. This is done in the `hyperparameter_tuning` function in `hyperparameter_tuning.py`.
+
 ### Database Operations
 
 The forecast data, loss data, and actual vs. predicted prices are stored in a PostgreSQL database. The functions for these operations are in `db_operations.py`.
@@ -35,6 +39,7 @@ The forecast data, loss data, and actual vs. predicted prices are stored in a Po
 - `data_fetching.py`: Contains the `fetch_and_preprocess_data` function that fetches, preprocesses, and splits the data into training and test sets.
 - `db_operations.py`: Contains functions for connecting to the database, creating tables, inserting data, and closing the connection.
 - `model_evaluation.py`: Contains the `evaluate_model` function that evaluates the model using RMSE and MAE.
+- `hyperparameter_tuning.py`: Contains the `hyperparameter_tuning` function that performs hyperparameter tuning using either Random Search or Bayesian Optimization.
 - `best_params.json`: A JSON file that stores the best parameters for the model.
 
 ## Installation
@@ -46,7 +51,6 @@ To use this application, you need to have Python and PostgreSQL installed on you
 This application is designed to be easy to use. Follow the steps below to get started:
 
 1. **Clone the repository**: Clone the Next1v2 repository to your local machine using the following command in your terminal:
-
     `
     git clone https://github.com/N3v3R3nD/Next1v2.git
     `
