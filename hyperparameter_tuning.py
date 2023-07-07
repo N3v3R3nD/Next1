@@ -1,32 +1,34 @@
 # hyperparameter_tuning.py
+
 from sklearn.model_selection import TimeSeriesSplit, RandomizedSearchCV
 from scikeras.wrappers import KerasRegressor
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LSTM, Dropout
+from tensorflow.keras import regularizers
 import tensorflow as tf
 import time
 import json
 import logging
 
-
-# Function to create LSTM model
-def create_model(units=100, optimizer='adam', dropout_rate=0.0):
+def create_model(look_back, num_features, units=100, optimizer='adam', dropout_rate=0.0):
+    print(f"num_features: {num_features}")  # Print the value of num_features
     model = Sequential()
-    model.add(LSTM(units=units, return_sequences=True, input_shape=(look_back, train_features.shape[1]), kernel_regularizer=tf.keras.regularizers.L2(0.01)))
-    model.add(Dropout(dropout_rate))  # Add dropout layer
-    model.add(LSTM(units=units, return_sequences=True, kernel_regularizer=tf.keras.regularizers.L2(0.01)))
-    model.add(Dropout(dropout_rate))  # Add dropout layer
-    model.add(LSTM(units=units, return_sequences=False, kernel_regularizer=tf.keras.regularizers.L2(0.01)))
+    model.add(LSTM(units=units, return_sequences=True, input_shape=(look_back, num_features), kernel_regularizer=regularizers.L2(0.01)))
+    model.add(Dropout(dropout_rate))
+    model.add(LSTM(units=units, return_sequences=True, kernel_regularizer=regularizers.L2(0.01)))
+    model.add(Dropout(dropout_rate)) 
+    model.add(LSTM(units=units, return_sequences=False, kernel_regularizer=regularizers.L2(0.01)))
     model.add(Dense(units=25))
     model.add(Dense(units=1))
     model.compile(optimizer=optimizer, loss='mean_squared_error')
     return model
 
-def hyperparameter_tuning(X_train, Y_train, look_back, feature_num):
+def hyperparameter_tuning(X_train, Y_train, look_back, feature_num, train_features):
     # Wrap Keras model with KerasRegressor
-    model_params = {'units': 100, 'optimizer': 'adam', 'dropout_rate': 0.0}
-    model = KerasRegressor(model=create_model, **model_params, verbose=0)
-
+    model_params = {'units': 100, 'optimizer': 'adam', 'dropout_rate': 0.0, 'num_features': feature_num}
+    model = KerasRegressor(model=create_model, look_back=look_back, **model_params, verbose=0)
+    
+    
     # Define hyperparameters for RandomizedSearchCV
     param_dist = {
         'units': [50, 100, 150, 200],  # More units can help model complexity
@@ -36,7 +38,7 @@ def hyperparameter_tuning(X_train, Y_train, look_back, feature_num):
         'optimizer': ['Adam']  # Different optimizers can have different effects on training
     }
 
-    # UseTimeSeriesSplit for cross-validation
+    # Use TimeSeriesSplit for cross-validation
     tscv = TimeSeriesSplit(n_splits=10)  # More splits can provide a more robust estimate of model performance
 
     # Define random_search before the try block
