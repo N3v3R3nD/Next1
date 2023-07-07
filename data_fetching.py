@@ -1,4 +1,3 @@
-# data_fetching.py
 def fetch_and_preprocess_data():
     import os
     import yfinance as yf
@@ -11,12 +10,12 @@ def fetch_and_preprocess_data():
     from sklearn.preprocessing import StandardScaler
 
     # Set up logging
-    logging.basicConfig(filename='data_fetching.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+    logging.basicConfig(filename='next1.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
     # Fetch data using yfinance
     logging.info('Fetching data using yfinance')
     today = datetime.today().strftime('%Y-%m-%d')
-    data = yf.download('SPY', start='2015-01-29', end=today)
+    data = yf.download('SPY', start='1993-01-29', end=today)
     logging.info('Data downloaded from Yahoo Finance')
     logging.info(f'Data shape: {data.shape}')
     logging.info('First few rows of the data:')
@@ -87,6 +86,7 @@ def fetch_and_preprocess_data():
     # Select features
     logging.info('Selecting features')
     features = data[['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume', 'SMA', 'EMA', 'RSI', 'MACD', 'Upper', 'Lower', 'Cumulative_Returns', 'VWAP', 'GDP Change', 'Unemployment Change']]
+    num_features = len(features.columns)  # Get the number of features
     logging.info('Features: ' + str(features.columns.tolist()))  # Log the order of features
 
     # Handle outliers
@@ -119,7 +119,7 @@ def fetch_and_preprocess_data():
     # Create the dataset for training
     logging.info('Creating dataset for training')
     X_train, Y_train = [], []
-    look_back = 22  # Define look_back here
+    look_back = 14  # Define look_back here
     for i in range(look_back, len(train_features)):
         X_train.append(scaled_train_features[i-look_back:i, :])
         Y_train.append(scaled_train_target[i, 0])  # Use scaled_train_target here
@@ -135,4 +135,4 @@ def fetch_and_preprocess_data():
     X_train, Y_train = np.array(X_train), np.array(Y_train)
     X_test, Y_test = np.array(X_test), np.array(Y_test)
 
-    return X_train, Y_train, X_test, Y_test, train_features, test_features, data, scaled_train_target, scaled_test_target, look_back, target_scaler
+    return X_train, Y_train, X_test, Y_test, train_features, test_features, data, scaled_train_target, scaled_test_target, look_back, target_scaler, num_features
