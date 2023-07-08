@@ -4,16 +4,28 @@ from sklearn.model_selection import KFold
 from hyperparameter_tuning import create_model  # Import the create_model function
 import logging  # Import the logging module
 
+import json
+
+# Load the configuration
+with open('config.json') as f:
+    config = json.load(f)
+
+# Access the parameters
+use_kfold = config['use_kfold']
+kfold_splits = config['kfold_splits']
+
 def train_model(X_train, Y_train, X_test, Y_test, look_back, num_features, model_params):
     # Define early stopping
     early_stopping = EarlyStopping(monitor='val_loss', patience=2)
 
     # Define 5-fold cross validation
-    use_kfold = False  # Set this flag to True to enable KFold cross-validation
-    kf = KFold(n_splits=5, shuffle=True, random_state=42) if use_kfold else None
+
+    kf = KFold(n_splits=kfold_splits, shuffle=True, random_state=42) if use_kfold else None
 
     # Log the KFold configuration
     logging.info(f'KFold cross-validation: {use_kfold}')
+    if use_kfold:
+        logging.info(f'Starting KFold Cross Validation splits: {kfold_splits}')  # Log the number of splits
 
     # Define a list to store the model objects of each fold
     models = []
@@ -26,8 +38,8 @@ def train_model(X_train, Y_train, X_test, Y_test, look_back, num_features, model
             Y_train_fold, Y_val_fold = Y_train[train_index], Y_train[val_index]
 
             # Create a new model for this fold
-            model = KerasRegressor(model=create_model, look_back=look_back, **model_params, verbose=0)
-            
+            model = KerasRegressor(model=create_model, look_back=look_back, num_features=num_features, **model_params, verbose=0)
+
             # Fit the model and store the model object
             history = model.fit(X_train_fold, Y_train_fold, validation_data=(X_val_fold, Y_val_fold), verbose=1, callbacks=[early_stopping])
 
