@@ -1,0 +1,10 @@
+{
+    "use_kfold": true,
+    "kfold_splits": 2,
+    "early_stopping_patience": 2,
+    "look_back": 1,
+    "model_params": {
+        "param1": "value1",
+        "param2": "value2"
+    }
+}
