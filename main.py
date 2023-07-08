@@ -17,7 +17,6 @@ from scikeras.wrappers import KerasRegressor
 from datetime import datetime, timedelta
 import time
 import tensorflow as tf
-from tensorflow.keras.callbacks import EarlyStopping
 from sklearn.preprocessing import StandardScaler
 import pandas_datareader as pdr
 from sklearn.model_selection import KFold
@@ -26,6 +25,7 @@ import data_fetching
 import db_operations
 import model_evaluation
 from hyperparameter_tuning import create_model, hyperparameter_tuning
+from model_training import train_model  # Import the train_model function
 
 # Set up logging
 logging.basicConfig(filename='next1.log', level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
@@ -51,11 +51,6 @@ logging.info('Hyperparameter tuning')
 # Hyperparameter tuning
 best_params = hyperparameter_tuning(X_train, Y_train, look_back, train_features.shape[1], train_features, use_bayesian_optimization=True)
 model_params = best_params.copy()
-# Print the first few elements of Y_train and Y_test
-
-# Create model with best parameters
-
-model = KerasRegressor(model=create_model, look_back=look_back, num_features=train_features.shape[1], **model_params, verbose=0)
 
 # Reshape data for LSTM
 logging.info('Reshaping data for LSTM')
@@ -74,52 +69,14 @@ scaled_first_close_price = (first_close_price - min_close_price) / (max_close_pr
 logging.info("Manually computed scaled value for the first 'Close' price: " + str(scaled_first_close_price))
 logging.info("First value in scaled_train_target: " + str(scaled_train_target[0][0]))
 
-# Define early stopping
-early_stopping = EarlyStopping(monitor='val_loss', patience=2)
-
-# Define 5-fold cross validation
-use_kfold = False  # Set this flag to True to enable KFold cross-validation
-kf = KFold(n_splits=5, shuffle=True, random_state=42) if use_kfold else None
-
-# Log the KFold configuration
-logging.info(f'KFold cross-validation: {use_kfold}')
-
-# Define a list to store the model objects of each fold
-models = []
-
-# Loop over each fold
-if kf:
-    for train_index, val_index in kf.split(X_train):
-        # Create training and validation sets for this fold
-        X_train_fold, X_val_fold = X_train[train_index], X_train[val_index]
-        Y_train_fold, Y_val_fold = Y_train[train_index], Y_train[val_index]
-
-        # Create a new model for this fold
-        model = KerasRegressor(model=create_model, look_back=look_back, **model_params, verbose=0)
-        
-        # Fit the model and store the model object
-        history = model.fit(X_train_fold, Y_train_fold, validation_data=(X_val_fold, Y_val_fold), verbose=1, callbacks=[early_stopping])
-
-        # Add the model object to the list
-        models.append(model)
-
-else:
-    # No KFold cross-validation, train a single model on the whole dataset
-    # Wrap Keras model with KerasRegressor
-    # Create model with best parameters
-    model = KerasRegressor(model=create_model, look_back=look_back, num_features=num_features, **model_params, verbose=0)
-    history = model.fit(X_train, Y_train, validation_data=(X_test, Y_test), verbose=1, callbacks=[early_stopping])
-
-    models.append(model)
-
-# Access the underlying Keras model and its history
-keras_model = model.model_
-history = keras_model.history.history
+# Train the model
+model, history = train_model(X_train, Y_train, X_test, Y_test, look_back, num_features, model_params)
 
 # Generate predictions
 logging.info('Generating predictions')
 train_predict = model.predict(X_train)
 test_predict = model.predict(X_test)
+
 # Access the underlying Keras model
 keras_model = model.model_
 
@@ -139,7 +96,6 @@ db_operations.create_tables(cur)
 # Insert data
 db_operations.insert_data(cur, history, Y_train, train_predict, test_predict, target_scaler)
 db_operations.insert_evaluation_results(cur, train_rmse, test_rmse, train_mae, test_mae)
-
 
 # Close the connection
 db_operations.close_connection(conn)
