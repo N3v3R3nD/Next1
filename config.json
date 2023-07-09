@@ -1,8 +1,9 @@
 {
+    "look_back": 21,
+    "yfinance_symbol": "SPY",
     "use_kfold": false,
     "kfold_splits": 2,
     "early_stopping_patience": 2,
-    "look_back": 21,
     "model_params": {
         "units": 100,
         "batch_size": 32,
