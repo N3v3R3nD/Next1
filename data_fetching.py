@@ -10,6 +10,15 @@ def fetch_and_preprocess_data():
     from pandas.tseries.holiday import USFederalHolidayCalendar
     from sklearn.preprocessing import StandardScaler
 
+    import json
+
+    # Load the configuration
+    with open('config.json') as f:
+        config = json.load(f)
+
+    # Access the parameters
+    look_back = config['look_back']
+
     # Set up logging
     logging.basicConfig(filename='next1.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
@@ -91,6 +100,7 @@ def fetch_and_preprocess_data():
     logging.info('Features: ' + str(features.columns.tolist()))  # Log the order of features
 
     # Handle outliers
+    logging.info('Handling outliers')
     Q1 = features.quantile(0.25)
     Q3 = features.quantile(0.75)
     IQR = Q3 - Q1
@@ -108,6 +118,7 @@ def fetch_and_preprocess_data():
     test_features = features[split:]
 
     # Fit the scaler on the training data and transform both training and test data
+    logging.info('Scaling data')
     scaled_train_features = feature_scaler.fit_transform(train_features)
     scaled_test_features = feature_scaler.transform(test_features)
 
@@ -120,17 +131,17 @@ def fetch_and_preprocess_data():
     # Create the dataset for training
     logging.info('Creating dataset for training')
     X_train, Y_train = [], []
-    look_back = 14  # Define look_back here
+    look_back = look_back 
     for i in range(look_back, len(train_features)):
         X_train.append(scaled_train_features[i-look_back:i, :])
-        Y_train.append(scaled_train_target[i, 0])  # Use scaled_train_target here
+        Y_train.append(scaled_train_target[i, 0])
 
     # Create the dataset for testing
     logging.info('Creating dataset for testing')
     X_test, Y_test = [], []
     for i in range(look_back, len(test_features)):
         X_test.append(scaled_test_features[i-look_back:i, :])
-        Y_test.append(scaled_test_target[i, 0])  # Use scaled_test_target here
+        Y_test.append(scaled_test_target[i, 0]) 
 
     # Convert lists to numpy arrays
     X_train, Y_train = np.array(X_train), np.array(Y_train)
