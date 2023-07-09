@@ -22,6 +22,7 @@ batch_size = param_dist['batch_size']
 epochs = param_dist['epochs']
 dropout_rate = param_dist['dropout_rate']
 optimizer = param_dist['optimizer']
+tscv_splits = config['tscv_splits']
 
 def create_model(look_back, num_features, units=100, optimizer='adam', dropout_rate=0.0):
     print(f"Please wait, tuning in progress") 
@@ -57,7 +58,7 @@ def hyperparameter_tuning(X_train, Y_train, look_back, feature_num, train_featur
     }
 
     # Use TimeSeriesSplit for cross-validation
-    tscv = TimeSeriesSplit(n_splits=10)  # More splits can provide a more robust estimate of model performance
+    tscv = TimeSeriesSplit(n_splits=config['tscv_splits'])  # More splits can provide a more robust estimate of model performance
 
     # Define search_cv before the try block
     if use_bayesian_optimization:
