@@ -25,7 +25,6 @@ optimizer = param_dist['optimizer']
 tscv_splits = config['tscv_splits']
 
 def create_model(look_back, num_features, units=100, optimizer='adam', dropout_rate=0.0):
-    print(f"Please wait, tuning in progress") 
     model = Sequential()
     model.add(LSTM(units=units, return_sequences=True, input_shape=(look_back, num_features), kernel_regularizer=regularizers.L2(0.01)))
     model.add(Dropout(dropout_rate))
