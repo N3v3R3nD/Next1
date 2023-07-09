@@ -1,16 +1,27 @@
-# db_operations.py
 import psycopg2
 from datetime import datetime, timedelta
 import logging
+import json
+
+# Load configuration
+with open('config.json') as f:
+    config = json.load(f)
+
+# Extract database credentials from config
+db_config = config['database']
+db_host = db_config['host']
+db_name = db_config['database']
+db_user = db_config['user']
+db_password = db_config['password']
 
 def connect_to_db():
     # Connect to the database
     logging.info('Connecting to the database')
     conn = psycopg2.connect(
-        host='localhost',
-        database='stock',
-        user='postgres',
-        password='test123'
+        host=db_host,
+        database=db_name,
+        user=db_user,
+        password=db_password
     )
     cur = conn.cursor()
     return conn, cur
