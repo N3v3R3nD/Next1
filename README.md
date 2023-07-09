@@ -1,6 +1,6 @@
 # Next1: Stock Market Forecasting Application
 
-Next1v2 is a sophisticated Python application designed for forecasting stock market prices. It leverages machine learning techniques to predict future prices based on historical data and various technical indicators.
+Next1 is a sophisticated Python application designed for forecasting stock market prices. It leverages machine learning techniques to predict future prices based on historical data and various technical indicators.
 
 ## Table of Contents
 
