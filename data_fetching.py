@@ -18,6 +18,7 @@ def fetch_and_preprocess_data():
 
     # Access the parameters
     look_back = config['look_back']
+    yfinance_symbol = config['yfinance_symbol']
 
     # Set up logging
     logging.basicConfig(filename='next1.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
@@ -25,7 +26,7 @@ def fetch_and_preprocess_data():
     # Fetch data using yfinance
     logging.info('Fetching data using yfinance')
     today = datetime.today().strftime('%Y-%m-%d')
-    data = yf.download('SPY', start='1993-01-29', end=today)
+    data = yf.download(yfinance_symbol, start='1993-01-29', end=today)
     logging.info('Data downloaded from Yahoo Finance')
     logging.info(f'Data shape: {data.shape}')
     logging.info('First few rows of the data:')
