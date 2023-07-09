@@ -1,5 +1,5 @@
 {
-    "use_kfold": true,
+    "use_kfold": false,
     "kfold_splits": 2,
     "early_stopping_patience": 2,
     "look_back": 21,
@@ -16,5 +16,11 @@
         "epochs": [50, 100, 150],
         "dropout_rate": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5],
         "optimizer": ["Adam"]
+    },
+    "database": {
+        "host": "localhost",
+        "database": "stock",
+        "user": "postgres",
+        "password": "test123"
     }
 }
