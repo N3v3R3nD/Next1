@@ -24,5 +24,6 @@
         "user": "postgres",
         "password": "test123"
     },
-    "tscv_splits": 10
+    "tscv_splits": 10,
+    "tuner": "grid"
 }
