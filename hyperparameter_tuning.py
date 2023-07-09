@@ -7,22 +7,20 @@ from tensorflow.keras import regularizers
 from skopt import BayesSearchCV
 import tensorflow as tf
 import time
-import json
 import logging
+import config
+import json
 
-# Load configuration
-with open('config.json') as f:
-    config = json.load(f)
 
 # Extract hyperparameters from config
-param_dist = config['param_dist']
+param_dist = config.param_dist
 units = param_dist['units']
 batch_size = param_dist['batch_size']
 epochs = param_dist['epochs']
 dropout_rate = param_dist['dropout_rate']
 optimizer = param_dist['optimizer']
-tscv_splits = config['tscv_splits']
-tuner = config['tuner']
+tscv_splits = config.tscv_splits
+tuner = config.tuner
 
 def create_model(look_back, num_features, units=100, optimizer='adam', dropout_rate=0.0):
     model = Sequential()
@@ -57,7 +55,7 @@ def hyperparameter_tuning(X_train, Y_train, look_back, feature_num, train_featur
     }
 
     # Use TimeSeriesSplit for cross-validation
-    tscv = TimeSeriesSplit(n_splits=config['tscv_splits'])  # More splits can provide a more robust estimate of model performance
+    tscv = TimeSeriesSplit(n_splits=config.tscv_splits) # More splits can provide a more robust estimate of model performance
 
     # Define search_cv before the try block
     if tuner == 'bayesian':
