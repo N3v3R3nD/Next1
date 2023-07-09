@@ -11,6 +11,17 @@ import time
 import json
 import logging
 
+# Load configuration
+with open('config.json') as f:
+    config = json.load(f)
+
+# Extract hyperparameters from config
+param_dist = config['param_dist']
+units = param_dist['units']
+batch_size = param_dist['batch_size']
+epochs = param_dist['epochs']
+dropout_rate = param_dist['dropout_rate']
+optimizer = param_dist['optimizer']
 
 def create_model(look_back, num_features, units=100, optimizer='adam', dropout_rate=0.0):
     print(f"Please wait, tuning in progress") 
@@ -28,16 +39,21 @@ def create_model(look_back, num_features, units=100, optimizer='adam', dropout_r
 
 def hyperparameter_tuning(X_train, Y_train, look_back, feature_num, train_features, use_bayesian_optimization=False):
     # Wrap Keras model with KerasRegressor
-    model_params = {'units': 100, 'optimizer': 'adam', 'dropout_rate': 0.0, 'num_features': feature_num}
+    model_params = {
+    'units': units,
+    'optimizer': optimizer,
+    'dropout_rate': dropout_rate,
+    'num_features': feature_num
+        }
     model = KerasRegressor(model=create_model, look_back=look_back, **model_params, verbose=0)
     
     # Define hyperparameters for RandomizedSearchCV or BayesSearchCV
     param_dist = {
-        'units': [50, 100, 150, 200],  # More units can help model complexity
-        'batch_size': [16, 32, 64, 128],  # Larger batch sizes can speed up training
-        'epochs': [50, 100, 150],  # More epochs can lead to more stable models
-        'dropout_rate': [0.0, 0.1, 0.2, 0.3, 0.4, 0.5],  # Dropout can help prevent overfitting
-        'optimizer': ['Adam']  # Different optimizers can have different effects on training
+        'units': units,
+        'batch_size': batch_size,
+        'epochs': epochs,
+        'dropout_rate': dropout_rate,
+        'optimizer': optimizer
     }
 
     # Use TimeSeriesSplit for cross-validation
