@@ -1,16 +1,16 @@
 # data_fetching.py
-def fetch_and_preprocess_data():
-    import os
-    import yfinance as yf
-    import numpy as np
-    import pandas as pd
-    import logging
-    from datetime import datetime, timedelta
-    import pandas_datareader as pdr
-    from pandas.tseries.holiday import USFederalHolidayCalendar
-    from sklearn.preprocessing import StandardScaler
+import os
+import yfinance as yf
+import numpy as np
+import pandas as pd
+import logging
+from datetime import datetime, timedelta
+import pandas_datareader as pdr
+from pandas.tseries.holiday import USFederalHolidayCalendar
+from sklearn.preprocessing import StandardScaler
+import json
 
-    import json
+def fetch_and_preprocess_data():
 
     # Load the configuration
     with open('config.json') as f:
