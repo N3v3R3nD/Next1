@@ -3,17 +3,13 @@ from scikeras.wrappers import KerasRegressor
 from sklearn.model_selection import KFold
 from hyperparameter_tuning import create_model  # Import the create_model function
 import logging  # Import the logging module
+import config
 
-import json
-
-# Load the configuration
-with open('config.json') as f:
-    config = json.load(f)
 
 # Access the parameters
-use_kfold = config['use_kfold']
-kfold_splits = config['kfold_splits']
-early_stopping_patience = config['early_stopping_patience']
+use_kfold = config.use_kfold
+kfold_splits = config.kfold_splits
+early_stopping_patience = config.early_stopping_patience
 
 def train_model(X_train, Y_train, X_test, Y_test, look_back, num_features, model_params):
     # Define early stopping
