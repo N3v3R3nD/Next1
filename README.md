@@ -8,7 +8,6 @@ Next1 is a sophisticated Python application designed for forecasting stock marke
 - [File Structure](#file-structure)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Code Organization and Quality](#code-organization-and-quality)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -60,12 +59,6 @@ This application is designed to be easy to use. Follow the steps below to get st
 2. **Run the application**: Run the application using the command: `python main.py`.
 
 The application will fetch the data, preprocess it, train the model, evaluate it, and store the results in the PostgreSQL database.
-
-## Code Organization and Quality
-
-The code is well-organized into different scripts based on their functionality. Each script is focused on a particular aspect of the application, such as data fetching, model evaluation, and database operations. This modular approach makes the code easier to maintain and understand.
-
-In terms of code quality, the application adheres to many good practices such as the use of clear and descriptive variable names, appropriate use of comments, and effective logging. However, there are areas for improvement. For example, the code could benefit from additional error handling, especially for database operations and data fetching.
 
 ## Contributing
 
