@@ -1,5 +1,5 @@
 # hyperparameter_tuning.py
-from sklearn.model_selection import TimeSeriesSplit, RandomizedSearchCV
+from sklearn.model_selection import TimeSeriesSplit, RandomizedSearchCV, GridSearchCV
 from scikeras.wrappers import KerasRegressor
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LSTM, Dropout
@@ -22,6 +22,7 @@ epochs = param_dist['epochs']
 dropout_rate = param_dist['dropout_rate']
 optimizer = param_dist['optimizer']
 tscv_splits = config['tscv_splits']
+tuner = config['tuner']
 
 def create_model(look_back, num_features, units=100, optimizer='adam', dropout_rate=0.0):
     model = Sequential()
@@ -36,7 +37,7 @@ def create_model(look_back, num_features, units=100, optimizer='adam', dropout_r
     return model
 
 
-def hyperparameter_tuning(X_train, Y_train, look_back, feature_num, train_features, use_bayesian_optimization=False):
+def hyperparameter_tuning(X_train, Y_train, look_back, feature_num, train_features):
     # Wrap Keras model with KerasRegressor
     model_params = {
     'units': units,
@@ -59,7 +60,7 @@ def hyperparameter_tuning(X_train, Y_train, look_back, feature_num, train_featur
     tscv = TimeSeriesSplit(n_splits=config['tscv_splits'])  # More splits can provide a more robust estimate of model performance
 
     # Define search_cv before the try block
-    if use_bayesian_optimization:
+    if tuner == 'bayesian':
         logging.info('Using Bayesian Optimization for hyperparameter tuning')
         search_cv = BayesSearchCV(
             estimator=model,
@@ -68,7 +69,15 @@ def hyperparameter_tuning(X_train, Y_train, look_back, feature_num, train_featur
             cv=tscv,
             n_jobs=-1
         )
-    else:
+    elif tuner == 'grid':
+        logging.info('Using Grid Search for hyperparameter tuning')
+        search_cv = GridSearchCV(
+            estimator=model,
+            param_grid=param_dist,
+            cv=tscv,
+            n_jobs=-1
+        )
+    elif tuner == 'random':
         logging.info('Using Random Search for hyperparameter tuning')
         search_cv = RandomizedSearchCV(
             estimator=model,
@@ -77,7 +86,9 @@ def hyperparameter_tuning(X_train, Y_train, look_back, feature_num, train_featur
             cv=tscv,
             n_jobs=-1
         )
-
+    else:
+        logging.error(f'Invalid tuner: {tuner}. Please set tuner to "bayesian", "grid", or "random" in the configuration file.')
+        return
     # Check if hyperparameters file exists
     try:
         with open('best_params.json', 'r') as f:
