@@ -8,17 +8,12 @@ from datetime import datetime, timedelta
 import pandas_datareader as pdr
 from pandas.tseries.holiday import USFederalHolidayCalendar
 from sklearn.preprocessing import StandardScaler
-import json
-
+import config
 def fetch_and_preprocess_data():
 
-    # Load the configuration
-    with open('config.json') as f:
-        config = json.load(f)
-
     # Access the parameters
-    look_back = config['look_back']
-    yfinance_symbol = config['yfinance_symbol']
+    look_back = config.look_back
+    yfinance_symbol = config.yfinance_symbol
 
     # Set up logging
     logging.basicConfig(filename='next1.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
