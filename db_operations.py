@@ -1,18 +1,15 @@
 import psycopg2
 from datetime import datetime, timedelta
 import logging
-import json
-
-# Load configuration
-with open('config.json') as f:
-    config = json.load(f)
+import config
 
 # Extract database credentials from config
-db_config = config['database']
-db_host = db_config['host']
-db_name = db_config['database']
-db_user = db_config['user']
-db_password = db_config['password']
+db_config = config.database
+host = db_config['host']
+database = db_config['database']
+user = db_config['user']
+password = db_config['password']
+
 
 def connect_to_db():
     # Connect to the database
