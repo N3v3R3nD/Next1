@@ -47,7 +47,7 @@ The forecast data, loss data, and actual vs. predicted prices are stored in a Po
 To use this application, follow the steps below:
 
 1. **Install Python and PostgreSQL**: The application requires Python and PostgreSQL. Make sure both are installed on your machine.
-2. **Clone the repository**: Clone the Next1v2 repository to your local machine using the following command in your terminal: `git clone https://github.com/N3v3R3nD/Next1v2.git`.
+2. **Clone the repository**: Clone the Next1v2 repository to your local machine using the following command in your terminal: `git clone https://github.com/N3v3R3nD/Next1.git`.
 3. **Navigate to the project directory**: Change your current directory to the Next1v2 directory: `cd Next1v2`.
 4. **Install the required Python libraries**: Install the required Python libraries by executing `pip install -r requirements.txt`. The required libraries include `numpy`, `pandas`, `sklearn`, `psycopg2`, `yfinance`, `pandas_datareader`, and `keras`.
 
