@@ -13,10 +13,11 @@ with open('config.json') as f:
 # Access the parameters
 use_kfold = config['use_kfold']
 kfold_splits = config['kfold_splits']
+early_stopping_patience = config['early_stopping_patience']
 
 def train_model(X_train, Y_train, X_test, Y_test, look_back, num_features, model_params):
     # Define early stopping
-    early_stopping = EarlyStopping(monitor='val_loss', patience=2)
+    early_stopping = EarlyStopping(monitor='val_loss', patience=early_stopping_patience)
 
     # Define 5-fold cross validation
 
@@ -41,8 +42,9 @@ def train_model(X_train, Y_train, X_test, Y_test, look_back, num_features, model
             model = KerasRegressor(model=create_model, look_back=look_back, num_features=num_features, **model_params, verbose=0)
 
             # Fit the model and store the model object
+            logging.info(f'Starting training for fold {len(models) + 1}')
             history = model.fit(X_train_fold, Y_train_fold, validation_data=(X_val_fold, Y_val_fold), verbose=1, callbacks=[early_stopping])
-
+            logging.info(f'Training completed for fold {len(models) + 1}')
             # Add the model object to the list
             models.append(model)
 
@@ -51,8 +53,9 @@ def train_model(X_train, Y_train, X_test, Y_test, look_back, num_features, model
         # Wrap Keras model with KerasRegressor
         # Create model with best parameters
         model = KerasRegressor(model=create_model, look_back=look_back, num_features=num_features, **model_params, verbose=0)
+        logging.info('Starting training on the whole dataset')
         history = model.fit(X_train, Y_train, validation_data=(X_test, Y_test), verbose=1, callbacks=[early_stopping])
-
+        logging.info('Training completed on the whole dataset')
         models.append(model)
 
     # Access the underlying Keras model and its history
