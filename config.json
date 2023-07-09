@@ -22,5 +22,6 @@
         "database": "stock",
         "user": "postgres",
         "password": "test123"
-    }
+    },
+    "tscv_splits": 10
 }
