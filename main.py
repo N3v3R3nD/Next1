@@ -26,17 +26,15 @@ import db_operations
 import model_evaluation
 from hyperparameter_tuning import create_model, hyperparameter_tuning
 from model_training import train_model  # Import the train_model function
+import config
 
-# Load the configuration
-with open('config.json') as f:
-    config = json.load(f)
 
 # Access the parameters
-use_kfold = config['use_kfold']
-kfold_splits = config['kfold_splits']
-early_stopping_patience = config['early_stopping_patience']
-look_back = config['look_back']
-model_params = config['model_params']
+use_kfold = config.use_kfold
+kfold_splits = config.kfold_splits
+early_stopping_patience = config.early_stopping_patience
+look_back = config.look_back
+model_params = config.model_params
 
 # Set up logging
 logging.basicConfig(filename='next1.log', level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
