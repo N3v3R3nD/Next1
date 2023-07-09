@@ -60,7 +60,7 @@ X_train, Y_train, X_test, Y_test, train_features, test_features, data, scaled_tr
 
 logging.info('Hyperparameter tuning')
 # Hyperparameter tuning
-best_params = hyperparameter_tuning(X_train, Y_train, look_back, train_features.shape[1], train_features, use_bayesian_optimization=True)
+best_params = hyperparameter_tuning(X_train, Y_train, look_back, train_features.shape[1], train_features)
 model_params = best_params.copy()
 
 # Reshape data for LSTM
